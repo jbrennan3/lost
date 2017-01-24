@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import psycopg2
+import sys
 
-conn = psycopg2.connect(dbname="hw2", host='127.0.0.1', port=5432)
+conn = psycopg2.connect(dbname=sys.argv[1],host='127.0.0.1',port=int(sys.argv[2]))
 cur = conn.cursor()
 
 app = Flask(__name__)
