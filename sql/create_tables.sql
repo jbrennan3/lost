@@ -28,7 +28,7 @@ CREATE TABLE facilities(
 CREATE TABLE asset_at(
 	asset_fk integer REFERENCES assets(asset_pk) ,
 	facility_fk integer REFERENCES facilities(facility_pk) ,
-	arrive_dt timestamp
+	arrive_dt text --should be timestamp but i'm having trouble
 );
 
 CREATE TABLE convoys(

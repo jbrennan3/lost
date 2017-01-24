@@ -11,3 +11,5 @@ Dependencies:
 	add_facilities.py - Python script to populate facility tables.
 	parse_product.py - Python script to populate product information.
 	parse_inventory.py - Python script to populate existing inventory.
+	parse_convoy.py - Python script to populate existing convoy info.
+	parse_transit.py - Python script to populate existing transit info.
