@@ -10,13 +10,8 @@
 CREATE TABLE user_accounts(
 	username varchar(16) primary key,
 	password varchar(16),
-	role_fk integer REFERENCES roles(role_pk),
+	role text,
 	email text
-);
-
-CREATE TABLE roles(
-	role_pk SERIAL primary key,
-	role text
 );
 
 CREATE TABLE assets(

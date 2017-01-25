@@ -50,13 +50,14 @@ def create_user():
     username = request.form['username']
     password = request.form['password']
     email    = request.form['email']
+    role     = request.form['role']
 
     try:
         if len(username) < 17:
             if len(password) < 17:
-                print(username)
-                SQL = "INSERT INTO user_accounts (username, password, email) VALUES (%s, %s, %s);"
-                DATA = (username, password, email)
+                print(username, password, email, role)
+                SQL = "INSERT INTO user_accounts (username, password, email, role) VALUES (%s, %s, %s, %s);"
+                DATA = (username, password, email, role)
                 cur.execute(SQL, DATA)
                 conn.commit()
                 session['valid'] = 1
