@@ -1,0 +1,30 @@
+<html>
+	<head><title>Assets</title></head>
+	<body><h1>Add Assets</h1>
+		<form action="{{url_for('add_asset')}}" method="POST">
+			asset_tag:<br>
+			<input type="text" name="asset_tag"> <br>
+			description:<br>
+			<input type="text" name="description"> <br>
+			facility:<br>
+			<input type="text" name="facility"> <br>
+			arrival date:<br>
+			<input type="date" name="arrive_dt"> <br>
+			<input type="submit" value="Add">
+		</form>
+
+		<table id="reportTable">
+			<tr class="header">
+				<th> ASSET TAG </th>
+				<th> DESCRIPTION </th>
+			</tr>
+
+			{% for row in session.report_results %}
+			<tr>
+				<td> {{row.asset_tag}} </td>
+				<td> {{row.description}} </td>
+			</tr>
+			{% endfor %}
+		</table>
+	</body>
+</html>

@@ -112,11 +112,58 @@ def add_facility():
             if not DUPLICATE:
                 SQL = "INSERT INTO facilities (common_name, fcode) VALUES (%s, %s);"
                 cur.execute(SQL, (common_name, fcode))
+                conn.commit()
                 return redirect(url_for('add_facility'))
             else: 
                 return render_template('duplicate_error.html')
         else:
             return render_template('privilege_error.html')
+
+@app.route('/add_asset', methods=['GET', 'POST'])
+def add_asset():
+    SQL = "SELECT * FROM assets;"
+    cur.execute(SQL)
+    DATA = cur.fetchall()
+    report_results = []
+    for line in DATA:
+        entry = {}
+        entry['asset_tag'] = line[1]
+        entry['description'] = line[2]
+        report_results.append(entry)
+    session['report_results'] = report_results
+
+    if request.method == 'GET':
+        return render_template('add_asset.html')
+
+    if request.method == 'POST':
+        if session['role'] == 'Logistics Officer':
+            asset_tag = request.form['asset_tag'].upper()
+            description = request.form['description'].upper()
+            facility = request.form['facility'].upper()
+            arrive_dt = request.form['arrive_dt']
+            SQL = "SELECT EXISTS(SELECT 1 FROM assets WHERE asset_tag=%s);"
+            cur.execute(SQL, (asset_tag,))
+            DUPLICATE = cur.fetchone()[0]
+            if not DUPLICATE:
+                #I know this section does not have error checking if facility is wrong or fields are missing
+                #I need to add those at some point.
+                SQL = "INSERT INTO assets (asset_tag, description) VALUES (%s, %s) RETURNING asset_pk;"
+                cur.execute(SQL, (asset_tag, description))
+                conn.commit()
+                asset_pk = cur.fetchone()[0]
+                SQL = "SELECT facility_pk FROM facilities WHERE common_name=%s;"
+                cur.execute(SQL, (facility,))
+                facility_pk = cur.fetchone()[0]
+                SQL = "INSERT INTO asset_at (asset_fk, facility_fk, arrive_dt) VALUES (%s, %s, %s);"
+                cur.execute(SQL, (asset_pk, facility_pk, arrive_dt))
+                conn.commit()
+                return redirect(url_for('add_asset'))
+            else:        
+                return render_template('duplicate_error.html')
+
+        else:
+            return render_template('privilege_error.html')
+
 
 if __name__=='__main__':
     app.run(host='0.0.0.0', port=8080)
