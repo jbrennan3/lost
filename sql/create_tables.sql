@@ -10,5 +10,30 @@
 CREATE TABLE user_accounts(
 	username varchar(16) primary key,
 	password varchar(16),
+	role_fk integer REFERENCES roles(role_pk),
 	email text
 );
+
+CREATE TABLE roles(
+	role_pk SERIAL primary key,
+	role text
+);
+
+CREATE TABLE assets(
+	asset_pk SERIAL primary key,
+	asset_tag varchar(16),
+	description text
+);
+
+CREATE TABLE facilities(
+	facility_pk SERIAL primary key,
+	common_name varchar(32),
+	fcode varchar(6)
+);
+
+-- Attempt to solve future linking as suggested in prompt.
+CREATE TABLE asset_at(
+	asset_fk integer REFERENCES assets(asset_pk),
+	facility_fk integer REFERENCES facilities(facility_pk)
+);
+
