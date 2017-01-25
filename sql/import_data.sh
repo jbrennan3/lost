@@ -1,9 +1,6 @@
 #! /usr/bin/bash
 # Take two user arguments $1 and $2
 # Database and Port Number
-curl https://classes.cs.uoregon.edu//17W/cis322/files/osnap_legacy.tar.gz > osnap_legacy.tar.gz
-tar -xvf osnap_legacy.tar.gz
-psql -d $1 -a -f create_tables.sql
 python3 add_facilities.py $1 $2
 python3 add_security.py $1 $2
 python3 parse_product.py $1 $2 osnap_legacy/product_list.csv
@@ -14,5 +11,3 @@ python3 parse_inventory.py $1 $2 osnap_legacy/NC_inventory.csv NC
 python3 parse_inventory.py $1 $2 osnap_legacy/SPNV_inventory.csv SPNV
 python3 parse_convoy.py $1 $2 osnap_legacy/convoy.csv
 python3 parse_transit.py $1 $2 osnap_legacy/transit.csv
-rm -rf osnap_legacy/
-rm -rf osnap_legacy.tar.gz
