@@ -1,0 +1,9 @@
+<html>
+	<head><title>New User</title></head>
+	<body><h1>Create User</h1>
+		New user: {{session.username}} successfully added! 
+		<form action="{{url_for('dashboard')}}" method="GET">
+			<input type="submit" value="Continue">
+		</form>
+	</body>
+</html>

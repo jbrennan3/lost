@@ -1,0 +1,19 @@
+<html>
+	<head><title>New User</title></head>
+	<body><h1>Create User</h1>
+		<form action="{{url_for('create_user')}}" method="POST">
+			Username:<br>
+			<input type="text" name="username"> <br>
+			Password:<br>
+			<input type="text" name="password"> <br>
+			Email:<br>
+			<input type="text" name="email"><br><br>
+			<input type="submit" value="Create">
+		</form>
+		<br> There was an error please try again:
+		<br> Username must be less than 17 characters and cannot be empty.
+		<br> Password must be less than 17 characters and cannot be empty.
+		<br> You must provide an email address.
+		<br> If both conditions are met username may be taken.
+	</body>
+</html>
