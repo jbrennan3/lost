@@ -1,0 +1,26 @@
+<html>
+	<head><title>Facilities</title></head>
+	<body><h1>Add Facility</h1>
+		<form action="{{url_for('add_facility')}}" method="POST">
+			common_name:<br>
+			<input type="text" name="common_name"> <br>
+			fcode:<br>
+			<input type="text" name="fcode"> <br>
+			<input type="submit" value="Add">
+		</form>
+
+		<table id="reportTable">
+			<tr class="header">
+				<th> FACILITY </th>
+				<th> FCODE </th>
+			</tr>
+
+			{% for row in session.report_results %}
+			<tr>
+				<td> {{row.common_name}} </td>
+				<td> {{row.fcode}} </td>
+			</tr>
+			{% endfor %}
+		</table>
+	</body>
+</html>

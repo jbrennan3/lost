@@ -22,8 +22,11 @@ def login():
         DATA = (username, password)
         cur.execute(SQL, DATA)
         CORRECTLOGIN = cur.fetchone()[0]
-        print(CORRECTLOGIN)
         if CORRECTLOGIN:
+            SQL = "SELECT role FROM user_accounts WHERE username=%s;"
+            DATA = (username,)
+            cur.execute(SQL, DATA)
+            session['role'] = cur.fetchone()[0]
             session['valid'] = 1
             session['username'] = username
             return redirect(url_for('dashboard'))
@@ -55,7 +58,6 @@ def create_user():
     try:
         if len(username) < 17:
             if len(password) < 17:
-                print(username, password, email, role)
                 SQL = "INSERT INTO user_accounts (username, password, email, role) VALUES (%s, %s, %s, %s);"
                 DATA = (username, password, email, role)
                 cur.execute(SQL, DATA)
@@ -83,6 +85,38 @@ def dashboard():
         return redirect(url_for('login'))
     else:
         return render_template('dashboard.html');
+
+@app.route('/add_facility', methods=['GET', 'POST'])
+def add_facility():
+    SQL = "SELECT * FROM facilities;"
+    cur.execute(SQL)
+    DATA = cur.fetchall()
+    report_results = []
+    for line in DATA:
+        entry = {}
+        entry['common_name'] = line[1]
+        entry['fcode'] = line[2]
+        report_results.append(entry)
+    session['report_results'] = report_results
+
+    if request.method == 'GET':
+        return render_template('add_facility.html')
+
+    if request.method == 'POST':
+        if session['role'] == 'Facilities Officer':
+            common_name = request.form['common_name'].upper()
+            fcode = request.form['fcode'].upper()
+            SQL = "SELECT EXISTS(SELECT 1 FROM facilities WHERE common_name=%s OR fcode=%s);"
+            cur.execute(SQL, (common_name, fcode))
+            DUPLICATE = cur.fetchone()[0]
+            if not DUPLICATE:
+                SQL = "INSERT INTO facilities (common_name, fcode) VALUES (%s, %s);"
+                cur.execute(SQL, (common_name, fcode))
+                return redirect(url_for('add_facility'))
+            else: 
+                return render_template('duplicate_error.html')
+        else:
+            return render_template('privilege_error.html')
 
 if __name__=='__main__':
     app.run(host='0.0.0.0', port=8080)
