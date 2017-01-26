@@ -39,8 +39,16 @@
 
 	<nav>
 		<ul>
+			{% if session.role == 'Facilities Officer' %}
 			<form action="{{url_for('add_facility')}}" method="GET">
 				<input type="submit" value="Facilities"></form>
+			<form action="{{url_for('asset_report')}}" method="GET">
+				<input type="submit" value="Asset Report"></form>
+			<form action="{{url_for('transfer_report')}}" method="GET">
+				<input type="submit" value="Transfer Report"></form>
+			<form action="{{url_for('logout')}}" method="POST">
+				<input type="submit" value="Log Out"></form>
+			{% else %}
 			<form action="{{url_for('add_asset')}}" method="GET">
 				<input type="submit" value="Assets"></form>
 			<form action="{{url_for('transfer_req')}}" method="GET">
@@ -53,6 +61,7 @@
 				<input type="submit" value="Transfer Report"></form>
 			<form action="{{url_for('logout')}}" method="POST">
 				<input type="submit" value="Log Out"></form>
+			{% endif %}
 		</ul>
 	</nav>
 

@@ -11,7 +11,7 @@ CREATE TABLE user_accounts(
 	username varchar(16) primary key,
 	password varchar(16),
 	role text,
-	email text
+	active text
 );
 
 CREATE TABLE assets(
@@ -22,15 +22,16 @@ CREATE TABLE assets(
 
 CREATE TABLE facilities(
 	facility_pk SERIAL primary key,
-	common_name varchar(32),
-	fcode varchar(6)
+	fcode varchar(6),
+	common_name varchar(32)
 );
 
 -- Attempt to solve future linking as suggested in prompt.
 CREATE TABLE asset_at(
 	asset_fk integer REFERENCES assets(asset_pk) ON DELETE CASCADE,
 	facility_fk integer REFERENCES facilities(facility_pk) ON DELETE CASCADE,
-	arrive_dt text
+	arrive_dt text,
+	dispose_dt text
 );
 
 CREATE TABLE transfer_requests(
@@ -40,7 +41,9 @@ CREATE TABLE transfer_requests(
 	dest_fk integer REFERENCES facilities(facility_pk),
 	asset_fk integer REFERENCES assets(asset_pk),
 	approver varchar(16) DEFAULT NULL,
-	approval text
+	approval text,
+	request_dt text,
+	approve_dt text
 );
 
 CREATE TABLE in_transit(
