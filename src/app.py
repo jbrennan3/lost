@@ -38,8 +38,7 @@ def login():
 
 @app.route('/logout', methods=['POST'])
 def logout():
-    session.pop('username', None)
-    session.pop('valid', None)
+    session.clear()
     return render_template('logout_page.html')
 
 @app.route('/create_user', methods=['GET', 'POST'])
@@ -61,6 +60,7 @@ def create_user():
                 conn.commit()
                 session['valid'] = 1
                 session['username'] = username
+                session['role'] = role
                 return redirect(url_for('user_created'))
     except:
         pass
@@ -257,6 +257,43 @@ def transfer_report():
 
 @app.route('/transfer_req', methods=['GET', 'POST'])
 def transfer_req():
+    if session['role'] != 'Logistics Officer':
+        message = "Only Logistics Officers can access request transfers."
+        return render_template('error.html', message = message )
+
+    if request.method == 'GET':
+        return render_template('transfer_req.html')
+
+    if request.method == 'POST':
+        src = request.form['src']
+        dest = request.form['dest']
+        asset_tag = request.form['asset_tag']
+        SQL = "SELECT EXISTS(SELECT 1 FROM facilities f JOIN asset_at aa ON f.facility_pk=aa.facility_fk JOIN assets a ON a.asset_pk=aa.asset_fk WHERE common_name=%s AND asset_tag=%s);"
+        cur.execute(SQL, (src, asset_tag))
+        EXISTS = cur.fetchone()[0]
+        if EXISTS == 0:
+            message = "That asset is not at that facility, or that facility does not exist, please check your request again."
+            return render_template('error.html', message = message )
+
+        SQL = "SELECT EXISTS(SELECT 1 FROM facilities WHERE common_name=%s);"
+        cur.execute(SQL, (dest,))
+        EXISTS = cur.fetchone()[0]
+        if EXISTS == 0:
+            message = "The destination facility is not a valid destination, please check your request again."
+            return render_template('error.html', message = message )
+        
+        requester = session['username']
+        SQL = "SELECT facility_pk FROM facilities WHERE common_name=%s;"
+        cur.execute(SQL, (src,))
+        src_fk = cur.fetchone()[0]
+        cur.execute(SQL, (dest,))
+        dest_fk = cur.fetchone()[0]
+        SQL = "SELECT asset_pk FROM assets WHERE asset_tag=%s;"
+        cur.execute(SQL, (asset_tag,))
+        asset_fk = cur.fetchone()[0]
+        SQL = "INSERT INTO transfer_requests (requester, src_fk, dest_fk, asset_fk) VALUES (%s, %s, %s, %s);"
+        cur.execute(SQL, (requester, src_fk, dest_fk, asset_fk))
+        conn.commit()
     return render_template('transfer_req.html')
 
 
