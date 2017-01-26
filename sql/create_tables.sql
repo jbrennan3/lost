@@ -28,7 +28,8 @@ CREATE TABLE facilities(
 
 -- Attempt to solve future linking as suggested in prompt.
 CREATE TABLE asset_at(
-	asset_fk integer REFERENCES assets(asset_pk),
-	facility_fk integer REFERENCES facilities(facility_pk)
+	asset_fk integer REFERENCES assets(asset_pk) ON DELETE CASCADE,
+	facility_fk integer REFERENCES facilities(facility_pk) ON DELETE CASCADE,
+	arrive_dt text
 );
 
