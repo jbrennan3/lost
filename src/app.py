@@ -77,6 +77,34 @@ def dashboard():
     if 'valid' not in session:
         return redirect(url_for('login'))
     else:
+        if session['role'] == 'Logistics Officer':
+            SQL = "SELECT * FROM in_transit WHERE load_dt = '' OR load_dt = null OR unload_dt = '' OR unload_dt = null;"
+            cur.execute(SQL)
+            DATA = cur.fetchall()
+            dash_results = []
+            for line in DATA:
+                entry = {}
+                entry['val1'] = line[1]
+                entry['val2'] = line[2]
+                entry['val3'] = line[3]
+                entry['val4'] = line[4]
+                entry['val5'] = ''
+                entry['val6'] = ''
+
+        if session['role'] == 'Facilities Officer':
+            SQL = "SELECT * FROM transfer_requests WHERE approver = '' OR approver = null;"
+            cur.execute(SQL)
+            DATA = cur.fetchall()
+            dash_results = []
+            for line in DATA:
+                entry = {}
+                entry['val1'] = line[1]
+                entry['val2'] = line[2]
+                entry['val3'] = line[3]
+                entry['val4'] = line[4]
+                entry['val5'] = line[5]
+                entry['val6'] = line[6]
+
         return render_template('dashboard.html');
 
 @app.route('/add_facility', methods=['GET', 'POST'])
