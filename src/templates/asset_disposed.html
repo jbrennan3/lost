@@ -1,0 +1,15 @@
+<html>
+	<head><title>Assets</title></head>
+	<body><h1>Dispose Assets</h1>
+		<h2><a href="{{url_for('dashboard')}}">Return to Dashboard</a></h2>
+		
+		<form action="{{url_for('dispose_asset')}}" method="POST">
+			asset_tag:<br>
+			<input type="text" name="asset_tag"> <br>
+			<input type="submit" value="Remove">
+		</form>
+
+		{{session.asset_tag}} disposed. 
+
+	</body>
+</html>

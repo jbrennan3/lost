@@ -1,29 +1,30 @@
 <html>
 	<head><title>Assets</title></head>
-	<body><h1>Add Assets</h1>
+	<body><h1>Asset Report</h1>
 		<h2><a href="{{url_for('dashboard')}}">Return to Dashboard</a></h2>
-		<form action="{{url_for('add_asset')}}" method="POST">
-			asset_tag:<br>
-			<input type="text" name="asset_tag"> <br>
-			description:<br>
-			<input type="text" name="description"> <br>
+		<form action="{{url_for('asset_report')}}" method="POST">
 			facility:<br>
 			<input type="text" name="facility"> <br>
-			arrival date:<br>
-			<input type="date" name="arrive_dt"> <br>
-			<input type="submit" value="Add">
+			arrive date:<br>
+			<input type="date" name="date"> <br>
+			<input type="submit" value="Generate">
 		</form>
+
 
 		<table id="reportTable">
 			<tr class="header">
+				<th> FACILITY </th>
 				<th> ASSET TAG </th>
 				<th> DESCRIPTION </th>
+				<th> ARRIVE DT </th>
 			</tr>
 
-			{% for row in session.report_results %}
+			{% for row in session.asset_results %}
 			<tr>
+				<td> {{row.facility}} </td>
 				<td> {{row.asset_tag}} </td>
 				<td> {{row.description}} </td>
+				<td> {{row.arrive_dt}} </td>
 			</tr>
 			{% endfor %}
 		</table>

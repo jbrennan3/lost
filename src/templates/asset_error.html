@@ -1,18 +1,13 @@
 <html>
 	<head><title>Assets</title></head>
-	<body><h1>Add Assets</h1>
+	<body><h1>Dispose Assets</h1>
 		<h2><a href="{{url_for('dashboard')}}">Return to Dashboard</a></h2>
-		<form action="{{url_for('add_asset')}}" method="POST">
+		<form action="{{url_for('dispose_asset')}}" method="POST">
 			asset_tag:<br>
 			<input type="text" name="asset_tag"> <br>
-			description:<br>
-			<input type="text" name="description"> <br>
-			facility:<br>
-			<input type="text" name="facility"> <br>
-			arrival date:<br>
-			<input type="date" name="arrive_dt"> <br>
-			<input type="submit" value="Add">
+			<input type="submit" value="Remove">
 		</form>
+		That asset is not in the database, please enter an entry from the list below. <br>
 
 		<table id="reportTable">
 			<tr class="header">

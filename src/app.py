@@ -121,18 +121,18 @@ def add_facility():
 
 @app.route('/add_asset', methods=['GET', 'POST'])
 def add_asset():
-    SQL = "SELECT * FROM assets;"
-    cur.execute(SQL)
-    DATA = cur.fetchall()
-    report_results = []
-    for line in DATA:
-        entry = {}
-        entry['asset_tag'] = line[1]
-        entry['description'] = line[2]
-        report_results.append(entry)
-    session['report_results'] = report_results
 
     if request.method == 'GET':
+        SQL = "SELECT * FROM assets;"
+        cur.execute(SQL)
+        DATA = cur.fetchall()
+        report_results = []
+        for line in DATA:
+            entry = {}
+            entry['asset_tag'] = line[1]
+            entry['description'] = line[2]
+            report_results.append(entry)
+        session['report_results'] = report_results
         return render_template('add_asset.html')
 
     if request.method == 'POST':
@@ -163,6 +163,64 @@ def add_asset():
 
         else:
             return render_template('privilege_error.html')
+
+@app.route('/dispose_asset', methods=['GET', 'POST'])
+def dispose_asset():
+    if session['role'] != 'Logistics Officer':
+        return render_template('privilege_error.html')
+
+    if request.method == 'GET':
+        SQL = "SELECT * FROM assets;"
+        cur.execute(SQL)
+        DATA = cur.fetchall()
+        report_results = []
+        for line in DATA:
+            entry = {}
+            entry['asset_tag'] = line[1]
+            entry['description'] = line[2]
+            report_results.append(entry)
+        session['report_results'] = report_results
+        return render_template('dispose_asset.html')
+
+    if request.method == 'POST':
+        asset_tag = request.form['asset_tag'].upper()
+        session['asset_tag'] = asset_tag
+        SQL = "SELECT EXISTS(SELECT 1 FROM assets WHERE asset_tag=%s);"
+        cur.execute(SQL, (asset_tag,))
+        EXISTS = cur.fetchone()[0]
+        if EXISTS:
+            SQL = "DELETE FROM assets WHERE asset_tag=%s;"
+            cur.execute(SQL, (asset_tag,))
+            conn.commit()
+            return render_template('asset_disposed.html')
+    return render_template('asset_error.html')
+
+@app.route('/asset_report', methods=['GET', 'POST'])
+def asset_report():
+    if request.method == 'POST':
+        facility = request.form['facility'].upper()
+        date = request.form['date']
+        if facility == "":
+            facility = '%'
+        if date == "":
+            session['asset_results'] = []
+            return redirect(url_for('asset_report'))
+        SQL = "SELECT common_name, asset_tag, description, arrive_dt FROM facilities f JOIN asset_at aa ON f.facility_pk=aa.facility_fk JOIN assets a ON a.asset_pk=aa.asset_fk WHERE f.common_name LIKE '%" + facility + "%' AND aa.arrive_dt='" + date + "';"
+        cur.execute(SQL)
+        DATA = cur.fetchall()
+        report_results = []
+        for line in DATA:
+            entry = {}
+            entry['facility'] = line[0]
+            entry['asset_tag'] = line[1]
+            entry['description'] = line[2]
+            entry['arrive_dt'] = line[3]
+            report_results.append(entry)
+        session['asset_results'] = report_results
+
+    return render_template('asset_report.html')
+
+
 
 
 if __name__=='__main__':
