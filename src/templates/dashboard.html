@@ -39,13 +39,20 @@
 
 	<nav>
 		<ul>
-			<form action="{{url_for('add_facility')}}" method="GET"><input type="submit" value="Facilities"></form>
-			<form action="{{url_for('add_asset')}}" method="GET"><input type="submit" value="Assets"></form>
-			<form action="{{url_for('transfer_req')}}" method="GET"><input type="submit" value="Transfer Request"></form>
-			<form action="{{url_for('dispose_asset')}}" method="GET"><input type="submit" value="Dispose Asset"></form>
-			<form action="{{url_for('asset_report')}}" method="GET"><input type="submit" value="Asset Report"></form>
-			<form action="{{url_for('transfer_report')}}" method="GET"><input type="submit" value="Transfer Report"></form>
-			<form action="{{url_for('logout')}}" method="POST"><input type="submit" value="Log Out"></form>
+			<form action="{{url_for('add_facility')}}" method="GET">
+				<input type="submit" value="Facilities"></form>
+			<form action="{{url_for('add_asset')}}" method="GET">
+				<input type="submit" value="Assets"></form>
+			<form action="{{url_for('transfer_req')}}" method="GET">
+				<input type="submit" value="Transfer Request"></form>
+			<form action="{{url_for('dispose_asset')}}" method="GET">
+				<input type="submit" value="Dispose Asset"></form>
+			<form action="{{url_for('asset_report')}}" method="GET">
+				<input type="submit" value="Asset Report"></form>
+			<form action="{{url_for('transfer_report')}}" method="GET">
+				<input type="submit" value="Transfer Report"></form>
+			<form action="{{url_for('logout')}}" method="POST">
+				<input type="submit" value="Log Out"></form>
 		</ul>
 	</nav>
 
@@ -54,7 +61,26 @@
 		The role for this account is: {{session.role}} <p>
 
 		<table>
-			{% for row in session.dash_results %}
+			<tr>
+				{% if session.role == 'Facilities Officer' %}
+				<th> REQUESTOR </th>
+				<th> SRC </th>
+				<th> DEST </th>
+				<th> ASSET_TAG </th>
+				<th> APPROVER </th>
+				<th> APPROVAL </th>
+				<th> VALIDATION </th>
+				{% else %}
+				<th> ASSET TAG </th>
+				<th> SRC </th>
+				<th> LOAD_DT </th>
+				<th> DEST </th>
+				<th> UNLOAD_DT </th>
+				<th>  </th>
+				<th> UPDATE </th>
+				{% endif %}
+			</tr>
+			{% for row in session.report_results %}
 			<tr>
 				<td> {{row.val1}} </td>
 				<td> {{row.val2}} </td>
@@ -62,6 +88,15 @@
 				<td> {{row.val4}} </td>
 				<td> {{row.val5}} </td>
 				<td> {{row.val6}} </td>
+				<td> {% if session.role == 'Facilities Officer' %}
+					<form action="{{url_for('approve_req')}}" method="GET">
+						<button name='rec_id' type="submit" value="{{row.rec_id}}">Validate</button>
+					</form>
+				     {% else %}
+					<form action="{{url_for('update_transit')}}" method="GET">
+						<button name='rec_id' type="submit" value="{{row.rec_id}}">Update</button>
+					</form>
+				     {% endif %} </td>
 			</tr>
 			{% endfor %}
 		</table>

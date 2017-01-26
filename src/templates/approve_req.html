@@ -1,0 +1,31 @@
+<html>
+	<head><title>Transfer Validation</title></head>
+	<body><h1>Validate Transfer</h1>
+		<h2><a href="{{url_for('dashboard')}}">Return to Dashboard</a></h2>
+
+		<table id="reportTable">
+			<tr class="header">
+				<th> REQUESTOR </th>
+				<th> SRC_KEY </th>
+				<th> DEST_KEY </th>
+				<th> ASSET_KEY </th>
+				<th> APPROVER </th>
+				<th> APPROVAL </th>
+			</tr>
+
+			{% for row in session.report_results %}
+			<tr>
+				<td> {{row.val1}} </td>
+				<td> {{row.val2}} </td>
+				<td> {{row.val3}} </td>
+				<td> {{row.val4}} </td>
+				<td> {{row.val5}} </td>
+				<td> {{row.val6}} </td>
+			</tr>
+			{% endfor %}
+		</table>
+		<form action="{{url_for('approve_req')}}" method='POST'>
+			<button name="approval" type="submit" value="APPROVED">APPROVE</button>
+			<button name="approval" type="submit" value="REJECTED">REJECT</button>
+	</body>
+</html>

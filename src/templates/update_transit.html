@@ -1,0 +1,33 @@
+<html>
+	<head><title>Update Transit</title></head>
+	<body><h1>Transit Update</h1>
+		<h2><a href="{{url_for('dashboard')}}">Return to Dashboard</a></h2>
+
+		<table id="reportTable">
+			<tr class="header">
+				<th> ASSET_KEY </th>
+				<th> SRC_KEY </th>
+				<th> LOAD_DT </th>
+				<th> DEST_KEY </th>
+				<th> UNLOAD_DT </th>
+			</tr>
+
+			{% for row in session.report_results %}
+			<tr>
+				<td> {{row.val1}} </td>
+				<td> {{row.val2}} </td>
+				<td> {{row.val3}} </td>
+				<td> {{row.val4}} </td>
+				<td> {{row.val5}} </td>
+			</tr>
+			{% endfor %}
+		</table>
+		<form action="{{url_for('update_transit')}}" method='POST'>
+			LOAD_DT:
+			<input type="date" name="load_dt"> <br>
+			UNLOAD_DT:
+			<input type="date" name="unload_dt"><br>
+			<input type="submit" value="Update">
+		</form>
+	</body>
+</html>

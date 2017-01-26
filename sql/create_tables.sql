@@ -39,7 +39,7 @@ CREATE TABLE transfer_requests(
 	src_fk integer REFERENCES facilities(facility_pk),
 	dest_fk integer REFERENCES facilities(facility_pk),
 	asset_fk integer REFERENCES assets(asset_pk),
-	approver varchar(16),
+	approver varchar(16) DEFAULT NULL,
 	approval text
 );
 
@@ -47,8 +47,8 @@ CREATE TABLE in_transit(
 	transit_pk SERIAL primary key,
 	asset_fk integer REFERENCES assets(asset_pk),
 	src_fk integer REFERENCES facilities(facility_pk),
-	load_dt text,
+	load_dt text DEFAULT NULL,
 	dest_fk integer REFERENCES facilities(facility_pk),
-	unload_dt text
+	unload_dt text DEFAULT NULL
 );
 

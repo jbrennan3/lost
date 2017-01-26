@@ -78,32 +78,56 @@ def dashboard():
         return redirect(url_for('login'))
     else:
         if session['role'] == 'Logistics Officer':
-            SQL = "SELECT * FROM in_transit WHERE load_dt = '' OR load_dt = null OR unload_dt = '' OR unload_dt = null;"
+            SQL = "SELECT * FROM in_transit WHERE load_dt is null OR unload_dt is null;"
             cur.execute(SQL)
             DATA = cur.fetchall()
-            dash_results = []
+            report_results = []
             for line in DATA:
                 entry = {}
-                entry['val1'] = line[1]
-                entry['val2'] = line[2]
+                entry['rec_id'] = line[0]
+                SQL = "SELECT asset_tag FROM assets WHERE asset_pk=%s;"
+                cur.execute(SQL, (line[1],))
+                val = cur.fetchone()[0]
+                entry['val1'] = val
+                SQL = "SELECT common_name FROM facilities WHERE facility_pk=%s;"
+                cur.execute(SQL, (line[2],))
+                val = cur.fetchone()[0]
+                entry['val2'] = val
                 entry['val3'] = line[3]
-                entry['val4'] = line[4]
-                entry['val5'] = ''
+                SQL = "SELECT common_name FROM facilities WHERE facility_pk=%s;"
+                cur.execute(SQL, (line[4],))
+                val = cur.fetchone()[0]
+                entry['val4'] = val
+                entry['val5'] = line[5]
                 entry['val6'] = ''
+                report_results.append(entry)
+            session['report_results'] = report_results
 
         if session['role'] == 'Facilities Officer':
-            SQL = "SELECT * FROM transfer_requests WHERE approver = '' OR approver = null;"
+            SQL = "SELECT * FROM transfer_requests WHERE approver is null;"
             cur.execute(SQL)
             DATA = cur.fetchall()
-            dash_results = []
+            report_results = []
             for line in DATA:
                 entry = {}
+                entry['rec_id'] = line[0]
                 entry['val1'] = line[1]
-                entry['val2'] = line[2]
-                entry['val3'] = line[3]
-                entry['val4'] = line[4]
+                SQL = "SELECT common_name FROM facilities WHERE facility_pk=%s;"
+                cur.execute(SQL, (line[2],))
+                val = cur.fetchone()[0]
+                entry['val2'] = val
+                SQL = "SELECT common_name FROM facilities WHERE facility_pk=%s;"
+                cur.execute(SQL, (line[3],))
+                val = cur.fetchone()[0]
+                entry['val3'] = val
+                SQL = "SELECT asset_tag FROM assets WHERE asset_pk=%s;"
+                cur.execute(SQL, (line[4],))
+                val = cur.fetchone()[0]
+                entry['val4'] = val
                 entry['val5'] = line[5]
                 entry['val6'] = line[6]
+                report_results.append(entry)
+            session['report_results'] = report_results
 
         return render_template('dashboard.html');
 
@@ -265,9 +289,9 @@ def transfer_req():
         return render_template('transfer_req.html')
 
     if request.method == 'POST':
-        src = request.form['src']
-        dest = request.form['dest']
-        asset_tag = request.form['asset_tag']
+        src = request.form['src'].upper()
+        dest = request.form['dest'].upper()
+        asset_tag = request.form['asset_tag'].upper()
         SQL = "SELECT EXISTS(SELECT 1 FROM facilities f JOIN asset_at aa ON f.facility_pk=aa.facility_fk JOIN assets a ON a.asset_pk=aa.asset_fk WHERE common_name=%s AND asset_tag=%s);"
         cur.execute(SQL, (src, asset_tag))
         EXISTS = cur.fetchone()[0]
@@ -282,7 +306,7 @@ def transfer_req():
             message = "The destination facility is not a valid destination, please check your request again."
             return render_template('error.html', message = message )
         
-        requester = session['username']
+        requester = session['username'].upper()
         SQL = "SELECT facility_pk FROM facilities WHERE common_name=%s;"
         cur.execute(SQL, (src,))
         src_fk = cur.fetchone()[0]
@@ -294,7 +318,97 @@ def transfer_req():
         SQL = "INSERT INTO transfer_requests (requester, src_fk, dest_fk, asset_fk) VALUES (%s, %s, %s, %s);"
         cur.execute(SQL, (requester, src_fk, dest_fk, asset_fk))
         conn.commit()
-    return render_template('transfer_req.html')
+
+    message = "Transfer request submitted."
+    return render_template('transfer_req.html', message = message)
+
+@app.route('/approve_req', methods=['GET', 'POST'])
+def approve_req():
+    if session['role'] != 'Facilities Officer':
+        message = "Approval can only be accessed by a Facilities Officer"
+        return render_template('error.html', message = message )
+
+    if request.method == 'GET':
+        rec_id = request.args.get('rec_id')
+        session['rec_id'] = rec_id
+        SQL = "SELECT * from transfer_requests WHERE transfer_pk=%s;"
+        cur.execute(SQL, (rec_id,))
+        DATA = cur.fetchall()
+        report_results = []
+        for line in DATA:
+            entry = {}
+            entry['val1'] = line[1]
+            entry['val2'] = line[2]
+            entry['val3'] = line[3]
+            entry['val4'] = line[4]
+            entry['val5'] = line[5]
+            entry['val6'] = line[6]
+            report_results.append(entry)
+        session['report_results'] = report_results
+        return render_template('approve_req.html')
+
+    if request.method == 'POST':
+        if request.form['approval'] == "APPROVED":
+            SQL = "UPDATE transfer_requests SET approver=%s, approval=%s WHERE transfer_pk=%s;"
+            cur.execute(SQL, (session['username'].upper(), 'APPROVED', session['rec_id']))
+            SQL = "INSERT INTO in_transit (asset_fk, src_fk, dest_fk) VALUES (%s, %s, %s);"
+            asset_fk = session['report_results'][0]['val4']
+            src_fk = session['report_results'][0]['val2']
+            dest_fk = session['report_results'][0]['val3']
+            cur.execute(SQL, (asset_fk, src_fk, dest_fk))
+            conn.commit()
+
+        if request.form['approval'] == "REJECTED":
+            SQL = "UPDATE transfer_requests SET approver=%s, approval=%s WHERE transfer_pk=%s;"
+            cur.execute(SQL, (session['username'].upper(), 'REJECTED', session['rec_id']))
+            conn.commit()
+
+        session.pop('rec_id', None)
+    return redirect(url_for(('dashboard')))
+
+@app.route('/update_transit', methods=['GET', 'POST'])
+def update_transit():
+    if session['role'] != 'Logistics Officer':
+        message = "Transit information can only be updated by Logistics Officers."
+        return render_template('error.html', message = message )
+    
+    if request.method == 'GET':
+        rec_id = request.args.get('rec_id')
+        session['rec_id'] = rec_id
+        SQL = "SELECT * from in_transit WHERE transit_pk=%s;"
+        cur.execute(SQL, (rec_id,))
+        DATA = cur.fetchall()
+        report_results = []
+        for line in DATA:
+            entry = {}
+            entry['val1'] = line[1]
+            entry['val2'] = line[2]
+            entry['val3'] = line[3]
+            entry['val4'] = line[4]
+            entry['val5'] = line[5]
+            report_results.append(entry)
+        session['report_results'] = report_results
+        return render_template('update_transit.html')
+    
+    if request.method == 'POST':
+        SQL = 'SELECT EXISTS(SELECT 1 FROM in_transit WHERE transit_pk=%s AND load_dt is NULL);'
+        cur.execute(SQL, (session['rec_id'],))
+        NOTLOADED = cur.fetchone()[0]
+        SQL = 'SELECT EXISTS(SELECT 1 FROM in_transit WHERE transit_pk=%s AND unload_dt is NULL);'
+        cur.execute(SQL, (session['rec_id'],))
+        NOTUNLOADED = cur.fetchone()[0]
+
+        if NOTLOADED and request.form['load_dt'] != '':
+            SQL = "UPDATE in_transit SET load_dt=%s WHERE transit_pk=%s;"
+            cur.execute(SQL, (request.form['load_dt'], session['rec_id']))
+            conn.commit()
+        
+        if NOTUNLOADED and request.form['unload_dt'] != '':
+            SQL = "UPDATE in_transit SET unload_dt=%s WHERE transit_pk=%s;"
+            cur.execute(SQL, (request.form['load_dt'], session['rec_id']))
+            conn.commit()
+
+    return redirect(url_for('dashboard'))
 
 
 if __name__=='__main__':
