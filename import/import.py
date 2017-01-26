@@ -37,7 +37,7 @@ def main():
             cur.execute(SQL, (row['asset_tag'], row['description']))
             conn.commit()
             asset_pk = cur.fetchone()[0]
-            SQL = "SELECT facility_pk FROM facilities WHERE common_name=%s;"
+            SQL = "SELECT facility_pk FROM facilities WHERE fcode=%s;"
             cur.execute(SQL, (row['facility'],))
             facility_pk = cur.fetchone()[0]
             SQL = "INSERT INTO asset_at (asset_fk, facility_fk, arrive_dt, dispose_dt) VALUES (%s, %s, %s, %s);"
@@ -59,7 +59,7 @@ def main():
             if len(row['load_dt']) > 0:
                 APPROVAL = 'APPROVED'
                 
-            cur.execute(SQL, (row['requester'], src_fk, dest_fk, asset_fk, row['approver'], APPROVAL, row['request_dt'], row['approve_dt']))
+            cur.execute(SQL, (row['request_by'], src_fk, dest_fk, asset_fk, row['approve_by'], APPROVAL, row['request_dt'], row['approve_dt']))
             conn.commit()
             SQL = "INSERT INTO in_transit (asset_fk, src_fk, load_dt, dest_fk, unload_dt) VALUES (%s, %s, %s, %s, %s);"
             cur.execute(SQL, (asset_fk, src_fk, row['load_dt'], dest_fk, row['unload_dt']))
