@@ -31,13 +31,10 @@ def login():
             session['username'] = username
             return redirect(url_for('dashboard'))
         else:
-            return redirect(url_for('login_error'))
+            message = "Username and/or Password incorrect."
+            return render_template('error.html', message=message)
         
     return render_template('index.html')
-
-@app.route('/login_error', methods=['GET'])
-def login_error():
-    return render_template('login_error.html')
 
 @app.route('/logout', methods=['POST'])
 def logout():
@@ -67,13 +64,9 @@ def create_user():
                 return redirect(url_for('user_created'))
     except:
         pass
-
-    return redirect(url_for('user_error'))
+    message = "Invalid username or password."
+    return render_template('error.html', message = message)
     
-
-@app.route('/user_error', methods=['GET'])
-def user_error():
-    return render_template('user_error.html')
 
 @app.route('/user_created', methods=['GET'])
 def user_created():
@@ -115,9 +108,11 @@ def add_facility():
                 conn.commit()
                 return redirect(url_for('add_facility'))
             else: 
-                return render_template('duplicate_error.html')
+                message = "Duplicate facility detected."
+                return render_template('error.html', message = message)
         else:
-            return render_template('privilege_error.html')
+            message = "insufficient privileges; Facilities Officer required."
+            return render_template('error.html', message = message)
 
 @app.route('/add_asset', methods=['GET', 'POST'])
 def add_asset():
@@ -145,29 +140,36 @@ def add_asset():
             cur.execute(SQL, (asset_tag,))
             DUPLICATE = cur.fetchone()[0]
             if not DUPLICATE:
-                #I know this section does not have error checking if facility is wrong or fields are missing
-                #I need to add those at some point.
-                SQL = "INSERT INTO assets (asset_tag, description) VALUES (%s, %s) RETURNING asset_pk;"
-                cur.execute(SQL, (asset_tag, description))
-                conn.commit()
-                asset_pk = cur.fetchone()[0]
-                SQL = "SELECT facility_pk FROM facilities WHERE common_name=%s;"
-                cur.execute(SQL, (facility,))
-                facility_pk = cur.fetchone()[0]
-                SQL = "INSERT INTO asset_at (asset_fk, facility_fk, arrive_dt) VALUES (%s, %s, %s);"
-                cur.execute(SQL, (asset_pk, facility_pk, arrive_dt))
-                conn.commit()
-                return redirect(url_for('add_asset'))
+                try:
+                    #I know this section does not have error checking if facility is wrong or fields are missing
+                    #I need to add those at some point.
+                    SQL = "INSERT INTO assets (asset_tag, description) VALUES (%s, %s) RETURNING asset_pk;"
+                    cur.execute(SQL, (asset_tag, description))
+                    conn.commit()
+                    asset_pk = cur.fetchone()[0]
+                    SQL = "SELECT facility_pk FROM facilities WHERE common_name=%s;"
+                    cur.execute(SQL, (facility,))
+                    facility_pk = cur.fetchone()[0]
+                    SQL = "INSERT INTO asset_at (asset_fk, facility_fk, arrive_dt) VALUES (%s, %s, %s);"
+                    cur.execute(SQL, (asset_pk, facility_pk, arrive_dt))
+                    conn.commit()
+                    return redirect(url_for('add_asset'))
+                except:
+                    message = "Invalid and/or Insufficient data entered for asset."
+                    return render_template('error.html', message = message )
             else:        
-                return render_template('duplicate_error.html')
+                message = "Duplicate asset detected."
+                return render_template('error.html', message = message )
 
         else:
-            return render_template('privilege_error.html')
+            message = "insufficient privileges; Logistics Officer required."
+            return render_template('error.html', message = message )
 
 @app.route('/dispose_asset', methods=['GET', 'POST'])
 def dispose_asset():
     if session['role'] != 'Logistics Officer':
-        return render_template('privilege_error.html')
+        message = "insufficient privileges; Logistics Officer required."
+        return render_template('error.html', message = message)
 
     if request.method == 'GET':
         SQL = "SELECT * FROM assets;"
@@ -193,7 +195,8 @@ def dispose_asset():
             cur.execute(SQL, (asset_tag,))
             conn.commit()
             return render_template('asset_disposed.html')
-    return render_template('asset_error.html')
+    message = "There was a problem with the asset disposal, asset not found or something went very wrong."
+    return render_template('error.html', message = message)
 
 @app.route('/asset_report', methods=['GET', 'POST'])
 def asset_report():
@@ -220,7 +223,13 @@ def asset_report():
 
     return render_template('asset_report.html')
 
+@app.route('/transfer_report', methods=['GET'])
+def transfer_report():
+    return render_template('transfer_report.html')
 
+@app.route('/transfer_req', methods=['GET', 'POST'])
+def transfer_req():
+    return render_template('transfer_req.html')
 
 
 if __name__=='__main__':

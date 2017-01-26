@@ -33,3 +33,21 @@ CREATE TABLE asset_at(
 	arrive_dt text
 );
 
+CREATE TABLE transfer_requests(
+	transfer_pk SERIAL primary key,
+	requester varchar(16),
+	src_fk REFERENCES faciliities(facility_pk),
+	dest_fk REFERENCES facilities(facility_pk),
+	asset_fk REFERENCES assets(asset_pk),
+	approver varchar(16),
+	approval text
+);
+
+CREATE TABLE in_transit(
+	transit_pk SERIAL primary key,
+	src_fk REFERENCES facilities(facility_pk),
+	load_dt text,
+	dest_fk REFERENCES facilities(facility_pk),
+	unload_dt text
+);
+

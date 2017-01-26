@@ -4,8 +4,10 @@
 		Successfully logged into the system as {{session.username}}. <p>
 		<form action="{{url_for('add_facility')}}" method="GET"><input type="submit" value="Facilities"></form>
 		<form action="{{url_for('add_asset')}}" method="GET"><input type="submit" value="Assets"></form>
+		<form action="{{url_for('transfer_req')}}" method="GET"><input type="submit" value="Transfer Request"></form>
 		<form action="{{url_for('dispose_asset')}}" method="GET"><input type="submit" value="Dispose Asset"></form>
 		<form action="{{url_for('asset_report')}}" method="GET"><input type="submit" value="Asset Report"></form>
+		<form action="{{url_for('transfer_report')}}" method="GET"><input type="submit" value="Transfer Report"></form>
 		<form action="{{url_for('logout')}}" method="POST"><input type="submit" value="Log Out"></form>
 	</body>
 </html>
