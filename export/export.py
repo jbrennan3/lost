@@ -39,12 +39,12 @@ def main():
     cur.execute(SQL)
     results = cur.fetchall()
     with open(datapath + '/assets.csv', "w") as csvfile:
-            fieldnames = ['asset_tag', 'description', 'facility', 'aquired', 'disposed']
+            fieldnames = ['asset_tag', 'description', 'facility', 'acquired', 'disposed']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
             writer.writeheader()
             for row in results:
-                writer.writerow({'asset_tag' : row[0], 'description': row[1], 'facility': row[2], 'aquired': row[3], 'disposed': row[4]}) 
+                writer.writerow({'asset_tag' : row[0], 'description': row[1], 'facility': row[2], 'acquired': row[3], 'disposed': row[4]}) 
 
     SQL = "SELECT asset_tag, requester, request_dt, approver, approve_dt, fcode, it.dest_fk, load_dt, unload_dt FROM transfer_requests tr JOIN assets a ON tr.asset_fk=a.asset_pk JOIN facilities f ON tr.src_fk=f.facility_pk JOIN in_transit it ON it.asset_fk=a.asset_pk;"
     cur.execute(SQL)
